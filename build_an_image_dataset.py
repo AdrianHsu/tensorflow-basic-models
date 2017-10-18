@@ -31,84 +31,81 @@ We will show 2 different ways to build that dataset:
 Below, there are some parameters that you need to change (Marked 'CHANGE HERE'), 
 such as the dataset path.
 
-Author: Aymeric Damien
-Project: https://github.com/aymericdamien/TensorFlow-Examples/
+
 """
 from __future__ import print_function
 
 import tensorflow as tf
 import os
 
-# Dataset Parameters - CHANGE HERE
-MODE = 'folder' # or 'file', if you choose a plain text file (see above).
-DATASET_PATH = '/path/to/dataset/' # the dataset file or root folder path.
+MODE = 'folder'
+DATASET_PATH = './dat'
 
-# Image Parameters
-N_CLASSES = 2 # CHANGE HERE, total number of classes
-IMG_HEIGHT = 64 # CHANGE HERE, the image height to be resized to
-IMG_WIDTH = 64 # CHANGE HERE, the image width to be resized to
-CHANNELS = 3 # The 3 color channels, change to 1 if grayscale
+N_CLASSES = 2
+IMG_HEIGHT = 256
+IMG_WIDTH = 340
+CHANNELS = 3
 
+dataset_path = DATASET_PATH
+mode = MODE
+batch_size = 128
 
-# Reading the dataset
-# 2 modes: 'file' or 'folder'
-def read_images(dataset_path, mode, batch_size):
-    imagepaths, labels = list(), list()
-    if mode == 'file':
-        # Read dataset file
-        data = open(dataset_path, 'r').read().splitlines()
-        for d in data:
-            imagepaths.append(d.split(' ')[0])
-            labels.append(int(d.split(' ')[1]))
-    elif mode == 'folder':
-        # An ID will be affected to each sub-folders by alphabetical order
-        label = 0
-        # List the directory
-        try:  # Python 2
-            classes = sorted(os.walk(dataset_path).next()[1])
-        except Exception:  # Python 3
-            classes = sorted(os.walk(dataset_path).__next__()[1])
-        # List each sub-directory (the classes)
-        for c in classes:
-            c_dir = os.path.join(dataset_path, c)
-            try:  # Python 2
-                walk = os.walk(c_dir).next()
-            except Exception:  # Python 3
-                walk = os.walk(c_dir).__next__()
-            # Add each image to the training set
-            for sample in walk[2]:
-                # Only keeps jpeg images
-                if sample.endswith('.jpg') or sample.endswith('.jpeg'):
-                    imagepaths.append(os.path.join(c_dir, sample))
-                    labels.append(label)
-            label += 1
-    else:
-        raise Exception("Unknown mode.")
+# 懶得用 function call，直接一行行跑吧
+# def read_images(dataset_path, mode, batch_size):
+imagepaths, labels = list(), list()
+if mode == 'file':
+    data = open(dataset_path, 'r').read().splitlines()
+    for d in data:
+        imagepaths.append(d.split(' ')[0])
+        labels.append(int(d.split(' ')[1]))
+elif mode == 'folder':
+    label = 0
+    classes = sorted(os.walk(dataset_path).__next__()[1])
+#     print(classes) #['class0', 'class1']
+    for c in classes:
+        c_dir = os.path.join(dataset_path, c)
+        walk = os.walk(c_dir).__next__()
+#         print(walk) # if c == 0, if c == 1
+        for sample in walk[2]:
+            if sample.endswith('.jpg') or sample.endswith('.jpeg'):
+                imagepaths.append(os.path.join(c_dir, sample))
+                labels.append(label)
 
-    # Convert to Tensor
-    imagepaths = tf.convert_to_tensor(imagepaths, dtype=tf.string)
-    labels = tf.convert_to_tensor(labels, dtype=tf.int32)
-    # Build a TF Queue, shuffle data
-    image, label = tf.train.slice_input_producer([imagepaths, labels],
-                                                 shuffle=True)
+        label += 1
+else:
+    raise Exception("Unknown Mode.")
+# print(labels) #[0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
+# print(imagepaths)    #['./dat/class0/image_0001.jpg', './dat/class0/image_0002.jpg', './dat/class0/image_0003.jpg', './dat/class0/image_0004.jpg', './dat/class0/image_0005.jpg', './dat/class1/image_0011.jpg', './dat/class1/image_0012.jpg', './dat/class1/image_0013.jpg', './dat/class1/image_0014.jpg', './dat/class1/image_0015.jpg']
 
-    # Read images from disk
-    image = tf.read_file(image)
-    image = tf.image.decode_jpeg(image, channels=CHANNELS)
+# Convert to Tensor
+imagepaths = tf.convert_to_tensor(imagepaths, dtype=tf.string)
+labels = tf.convert_to_tensor(labels, dtype=tf.int32)
+# Build a TF Queue, shuffle data (AH:  NOT shuffle for me)
+image, label = tf.train.slice_input_producer([imagepaths, labels],
+                                             shuffle=False)
 
-    # Resize images to a common size
-    image = tf.image.resize_images(image, [IMG_HEIGHT, IMG_WIDTH])
+# Read images from disk
+image = tf.read_file(image)
+image = tf.image.decode_jpeg(image, channels=CHANNELS)
 
-    # Normalize
-    image = image * 1.0/127.5 - 1.0
+# Resize images to a common size
+image = tf.image.resize_images(image, [IMG_HEIGHT, IMG_WIDTH])
 
-    # Create batches
-    X, Y = tf.train.batch([image, label], batch_size=batch_size,
-                          capacity=batch_size * 8,
-                          num_threads=4)
+# Normalize... Why 127.5?
+# AH: the purpose of this normalization is to bring the values in range [-1.0 , 1.0]. 
+# As values for a pixel in grayscale are in range [0,255], 
+# we needed to divide by 127.5, to bring 255 to 2.0.
+image = image * 1.0/127.5 - 1.0
 
-    return X, Y
+# Create batches
+X, Y = tf.train.batch([image, label], batch_size=batch_size,
+                      capacity=batch_size * 8,
+                      num_threads=4)
 
+## YEAH! We finished the data processing part!
+## let's test these data with basic CNN as we learned before
+
+# 底下的 code 我就沒測了
 # -----------------------------------------------
 # THIS IS A CLASSIC CNN (see examples, section 3)
 # -----------------------------------------------
