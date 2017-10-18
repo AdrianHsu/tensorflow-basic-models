@@ -1,7 +1,7 @@
 from __future__ import division, print_function, absolute_import
 
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("/tmp/data/", one_hot=False)
+mnist = input_data.read_data_sets("./data/", one_hot=False)
 
 import tensorflow as tf
 

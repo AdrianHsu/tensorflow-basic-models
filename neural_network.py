@@ -11,6 +11,11 @@ import tensorflow as tf
 # An epoch usually means "one iteration over all of the training data". 
 # if you have 20,000 images and a batch size of 100 
 # then the epoch should contain 20,000 / 100 = 200 steps. 
+# 白話：固定照片數、batch_size，則可算出 1 epoch 包含 200 steps
+
+# If you choose our training image randomly 
+# (and independent) in each step, you normally do not call it epoch. 
+# 白話：如果固定的是 steps，則不去定義 epoch
 learning_rate = 0.1
 num_steps = 1000
 batch_size = 128
