@@ -121,7 +121,7 @@ display_step = 100
 dropout = 0.75 # Dropout, probability to keep units
 
 # Build the data input
-X, Y = read_images(DATASET_PATH, MODE, batch_size)
+# X, Y = read_images(DATASET_PATH, MODE, batch_size)
 
 
 # Create model
