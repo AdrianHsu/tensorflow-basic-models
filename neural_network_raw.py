@@ -71,6 +71,10 @@ with tf.Session() as sess:
     # Run the initializer, 在 session 的一開始先幫變數賦值
     sess.run(init) 
 
+# 讀入 500 training examples in each training iteration. 
+# We then run the train_op operation, using feed_dict to replace 
+# the placeholder tensors X and Y with the training examples.
+
     for step in range(1, num_steps+1): # 1 to 501
         batch_x, batch_y = mnist.train.next_batch(batch_size)
         

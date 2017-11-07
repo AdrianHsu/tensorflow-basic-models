@@ -29,6 +29,7 @@ def train():
     tf.summary.image('input', image_shaped_input, 10) # 方便顯示作圖而已
 
   # We can't initialize these variables to 0 - the network will get stuck.
+  # to initialize them with a slightly positive initial bias to avoid "dead neurons". 
   def weight_variable(shape):
     """Create a weight variable with appropriate initialization."""
     initial = tf.truncated_normal(shape, stddev=0.1) # 和 random_normal() 不太一樣

@@ -1,7 +1,8 @@
 from __future__ import print_function
-
+import argparse
+import sys
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("./data/", one_hot=False)
+
 
 import tensorflow as tf
 
@@ -74,26 +75,39 @@ def model_fn(features, labels, mode):
 
     return estim_specs
 
-# Estimator 評估器：進階 API，利用 model_fn 建構 model
-model = tf.estimator.Estimator(model_fn)
+def main(_):
+    mnist = input_data.read_data_sets(FLAGS.data_dir, one_hot=False)
 
-# Define the input function for training
-# 用來 train 的參數： x, y, batch_size, num_epochs...etc
-input_fn = tf.estimator.inputs.numpy_input_fn(
-    x={'images': mnist.train.images}, y=mnist.train.labels,
-    batch_size=batch_size, num_epochs=None, shuffle=True)
 
-# 開始 Train Model，傳入 input function
-model.train(input_fn, steps=num_steps)
+    # Estimator 評估器：進階 API，利用 model_fn 建構 model
+    model = tf.estimator.Estimator(model_fn, model_dir='./model_nn')
 
-# 訓練完畢，評估 Model 好壞
-# Define the input function
-# 用來 test 的參數： x, y, batch_size, num_epochs...etc
-input_fn = tf.estimator.inputs.numpy_input_fn(
-    x={'images': mnist.test.images}, y=mnist.test.labels,
-    batch_size=batch_size, shuffle=False)
+    # Define the input function for training
+    # 用來 train 的參數： x, y, batch_size, num_epochs...etc
+    input_fn = tf.estimator.inputs.numpy_input_fn(
+        x={'images': mnist.train.images}, y=mnist.train.labels,
+        batch_size=batch_size, num_epochs=None, shuffle=True)
 
-# Use the Estimator 'evaluate' method
-e = model.evaluate(input_fn)
+    # 開始 Train Model，傳入 input function
+    model.train(input_fn, steps=num_steps)
 
-print("Testing Accuracy:", e['accuracy'])
+    # 訓練完畢，評估 Model 好壞
+    # Define the input function
+    # 用來 test 的參數： x, y, batch_size, num_epochs...etc
+    input_fn = tf.estimator.inputs.numpy_input_fn(
+        x={'images': mnist.test.images}, y=mnist.test.labels,
+        batch_size=batch_size, shuffle=False)
+
+    # Use the Estimator 'evaluate' method
+    e = model.evaluate(input_fn) 
+
+    print("Testing Accuracy:", e['accuracy'])
+    # 結果：Testing Accuracy: 0.9118
+
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--data_dir', type=str, default='./mnist/input_data',
+                      help='Directory for storing input data')
+  FLAGS, unparsed = parser.parse_known_args()
+  tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
