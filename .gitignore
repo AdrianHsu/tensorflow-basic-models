@@ -1,4 +1,6 @@
+*.csv
 *.gz
 *.local
 events.out*
 .DS_Store
+__pycache__
