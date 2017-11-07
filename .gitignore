@@ -1,0 +1,4 @@
+*.gz
+*.local
+events.out*
+.DS_Store
