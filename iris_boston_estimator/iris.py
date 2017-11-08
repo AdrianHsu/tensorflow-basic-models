@@ -62,7 +62,18 @@ def main(_):
       num_epochs=None,
       shuffle=True)
 
+  # numpy_input_fn() defines the training input
+  # 把 x, y 用 .data, .target 傳進去，要是numpy array
+  # x={"x": np.array(training_set.data)},
+  # y=np.array(training_set.target)
+
   # Train model.
+
+  # You can employ a wrapper function that takes no arguments
+  # as your input_fn and use it to invoke your input function with the desired parameters. 
+  # 這樣不行：input_fn=my_input_fn(training_set) 因為是 function，要把function參數化
+  # 這樣行：(input_fn=lambda: my_input_fn(training_set) , steps=2000) 
+  # 因為 lambda wrapper 會回傳 object, 而不是 parameter
   classifier.train(input_fn=train_input_fn, steps=2000)
 
   # Define the test inputs

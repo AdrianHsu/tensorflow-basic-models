@@ -49,8 +49,9 @@ def main(_):
 
 
   # Build 3 layer DNN with 10, 20, 10 units respectively.
+  # 也有 DNNRegressor() 可以用
   classifier = tf.estimator.DNNClassifier(feature_columns=feature_columns,
-                                          hidden_units=[10, 20, 10],
+                                          hidden_units=[10, 20, 10], # 三層，分別有 10, 20, 10個node
                                           n_classes=3,
                                           model_dir="./tmp/iris_model", # config 是我多加的
                                           config=tf.contrib.learn.RunConfig(save_checkpoints_secs=1))
